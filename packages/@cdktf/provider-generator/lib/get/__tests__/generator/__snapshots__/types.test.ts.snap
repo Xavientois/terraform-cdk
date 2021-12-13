@@ -259,7 +259,7 @@ export class ComputedComplexEgress extends cdktf.ComplexComputedList {
 
   // security_groups - computed: true, optional: false, required: false
   public get securityGroups() {
-    return this.getListAttribute('security_groups');
+    return cdktf.Fn.tolist(this.getListAttribute('security_groups'));
   }
 
   // self - computed: true, optional: false, required: false
@@ -313,7 +313,7 @@ export class ComputedComplex extends cdktf.TerraformResource {
 
   // egress - computed: true, optional: false, required: false
   public egress(index: string) {
-    return new ComputedComplexEgress(this, 'egress', index);
+    return new ComputedComplexEgress(this, 'egress', index, true);
   }
 
   // =========
@@ -400,7 +400,7 @@ export class ComputedComplexNested extends cdktf.TerraformResource {
 
   // resources - computed: true, optional: false, required: false
   public resources(index: string) {
-    return new ComputedComplexNestedResources(this, 'resources', index);
+    return new ComputedComplexNestedResources(this, 'resources', index, false);
   }
 
   // =========
@@ -585,7 +585,7 @@ export function computedOptionalComplexEgressToTerraform(struct?: ComputedOption
     ipv6_cidr_blocks: cdktf.listMapper(cdktf.stringToTerraform)(struct!.ipv6CidrBlocks),
     prefix_list_ids: cdktf.listMapper(cdktf.stringToTerraform)(struct!.prefixListIds),
     protocol: cdktf.stringToTerraform(struct!.protocol),
-    security_groups: cdktf.listMapper(cdktf.stringToTerraform)(struct!.securityGroups),
+    security_groups: cdktf.setMapper(cdktf.stringToTerraform)(struct!.securityGroups),
     self: cdktf.booleanToTerraform(struct!.selfAttribute),
     to_port: cdktf.numberToTerraform(struct!.toPort),
   }
@@ -635,7 +635,7 @@ export class ComputedOptionalComplex extends cdktf.TerraformResource {
   private _egress?: ComputedOptionalComplexEgress[]; 
   public get egress() {
     // Getting the computed value is not yet implemented
-    return this.interpolationForAttribute('egress') as any;
+    return cdktf.Fn.tolist(this.interpolationForAttribute('egress')) as any;
   }
   public set egress(value: ComputedOptionalComplexEgress[]) {
     this._egress = value;
@@ -654,7 +654,7 @@ export class ComputedOptionalComplex extends cdktf.TerraformResource {
 
   protected synthesizeAttributes(): { [name: string]: any } {
     return {
-      egress: cdktf.listMapper(computedOptionalComplexEgressToTerraform)(this._egress),
+      egress: cdktf.setMapper(computedOptionalComplexEgressToTerraform)(this._egress),
     };
   }
 }
@@ -2130,7 +2130,7 @@ export class BlockTypeSetList extends cdktf.TerraformResource {
   private _timeoutsSet?: BlockTypeSetListTimeoutsSet[]; 
   public get timeoutsSet() {
     // Getting the computed value is not yet implemented
-    return this.interpolationForAttribute('timeouts_set') as any;
+    return cdktf.Fn.tolist(this.interpolationForAttribute('timeouts_set')) as any;
   }
   public set timeoutsSet(value: BlockTypeSetListTimeoutsSet[]) {
     this._timeoutsSet = value;
@@ -2166,7 +2166,7 @@ export class BlockTypeSetList extends cdktf.TerraformResource {
 
   protected synthesizeAttributes(): { [name: string]: any } {
     return {
-      timeouts_set: cdktf.listMapper(blockTypeSetListTimeoutsSetToTerraform)(this._timeoutsSet),
+      timeouts_set: cdktf.setMapper(blockTypeSetListTimeoutsSetToTerraform)(this._timeoutsSet),
       timeouts_list: cdktf.listMapper(blockTypeSetListTimeoutsListToTerraform)(this._timeoutsList),
     };
   }

@@ -135,6 +135,9 @@ export class AttributesEmitter {
     if (type.isStringList) {
       return `this.getListAttribute('${att.terraformName}')`;
     }
+    if (type.isStringSet) {
+      return `cdktf.Fn.tolist(this.getListAttribute('${att.terraformName}'))`;
+    }
     if (type.isNumber) {
       return `this.getNumberAttribute('${att.terraformName}')`;
     }
@@ -148,6 +151,9 @@ export class AttributesEmitter {
     }
 
     this.code.line(`// Getting the computed value is not yet implemented`);
+    if (type.isSet) {
+      return `cdktf.Fn.tolist(this.interpolationForAttribute('${att.terraformName}')) as any`;
+    }
     return `this.interpolationForAttribute('${att.terraformName}') as any`;
   }
 
@@ -203,9 +209,23 @@ export class AttributesEmitter {
         : "";
 
     switch (true) {
+      case type.isSet && type.isMap:
+        this.code.line(
+          `${att.terraformName}: ${defaultCheck}cdktf.setMapper(cdktf.hashMapper(cdktf.${att.mapType}ToTerraform))(${varReference}),`
+        );
+        break;
       case type.isList && type.isMap:
         this.code.line(
           `${att.terraformName}: ${defaultCheck}cdktf.listMapper(cdktf.hashMapper(cdktf.${att.mapType}ToTerraform))(${varReference}),`
+        );
+        break;
+      case type.isStringSet || type.isNumberSet || type.isBooleanSet:
+        this.code.line(
+          `${
+            att.terraformName
+          }: ${defaultCheck}cdktf.setMapper(cdktf.${downcaseFirst(
+            type.innerType
+          )}ToTerraform)(${varReference}),`
         );
         break;
       case type.isStringList || type.isNumberList || type.isBooleanList:
@@ -213,6 +233,13 @@ export class AttributesEmitter {
           `${
             att.terraformName
           }: ${defaultCheck}cdktf.listMapper(cdktf.${downcaseFirst(
+            type.innerType
+          )}ToTerraform)(${varReference}),`
+        );
+        break;
+      case type.isSet && !type.isSingleItem:
+        this.code.line(
+          `${att.terraformName}: ${defaultCheck}cdktf.setMapper(${downcaseFirst(
             type.innerType
           )}ToTerraform)(${varReference}),`
         );

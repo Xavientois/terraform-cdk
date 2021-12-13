@@ -90,26 +90,26 @@ export class AttributeModel {
       this.computed &&
       !this.isOptional &&
       this.type.isComputedComplex &&
-      this.type.isList &&
+      (this.type.isList || this.type.isSet) && // FIXME: write edge provider test covering this
       this.type.isMap
     ) {
       getterType = {
         _type: "args",
         args: "index: string, key: string",
         returnType: this.mapType,
-        returnStatement: `new ${this.type.name}(this, \`${this.terraformName}.\${index}\`).lookup(key)`,
+        returnStatement: `new ${this.type.name}(this, \`${this.terraformName}.\${index}\`, ${this.type.isSet}).lookup(key)`,
       };
     } else if (
       // Complex Computed List
       this.computed &&
       !this.isOptional &&
       this.type.isComputedComplex &&
-      this.type.isList
+      (this.type.isList || this.type.isSet)
     ) {
       getterType = {
         _type: "args",
         args: "index: string",
-        returnStatement: `new ${this.type.name}(this, '${this.terraformName}', index)`,
+        returnStatement: `new ${this.type.name}(this, '${this.terraformName}', index, ${this.type.isSet})`,
       };
     } else if (
       // Complex Computed Map

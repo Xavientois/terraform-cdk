@@ -3,6 +3,7 @@ import { Struct } from "./struct";
 export interface AttributeTypeModelOptions {
   struct?: Struct;
   isList?: boolean;
+  isSet?: boolean;
   isComputed?: boolean;
   isOptional?: boolean;
   isRequired?: boolean;
@@ -25,6 +26,7 @@ export interface ComputedComplexOptions {
 
 export class AttributeTypeModel {
   public isList: boolean;
+  public isSet: boolean;
   public isComputed: boolean;
   public isOptional: boolean;
   public isRequired?: boolean;
@@ -37,6 +39,7 @@ export class AttributeTypeModel {
   constructor(private _type: string, options: AttributeTypeModelOptions) {
     this.typeName = _type;
     this.isList = !!options.isList;
+    this.isSet = !!options.isSet;
     this.isMap = !!options.isMap;
     this.isComputed = !!options.isComputed;
     this.isOptional = !!options.isOptional;
@@ -55,16 +58,17 @@ export class AttributeTypeModel {
     if (this.isBooleanMap) return `cdktf.BooleanMap`;
     if (this.isMap)
       return `{ [key: string]: ${this._type} } | cdktf.IResolvable`;
-    if (this.isList && !this.isComputed && this.isSingleItem)
+    if ((this.isList || this.isSet) && !this.isComputed && this.isSingleItem)
       return `${this._type}`;
-    if (this.isList && !this.isComputed) return `${this._type}[]`;
+    if ((this.isList || this.isSet) && !this.isComputed)
+      return `${this._type}[]`;
     if (
-      this.isList &&
+      (this.isList || this.isSet) &&
       this.isComputed &&
       (this.isPrimitive || !this.struct?.isClass)
     )
       return `${this._type}[]`;
-    if (this.isList && this.isComputed && this.isComplex)
+    if ((this.isList || this.isSet) && this.isComputed && this.isComplex)
       return `${this._type}`;
 
     if (this._type === TokenizableTypes.BOOLEAN)
@@ -94,8 +98,20 @@ export class AttributeTypeModel {
     return this.name === TokenizableTypes.NUMBER;
   }
 
+  public get isStringSet(): boolean {
+    return this.isSet && this.name === TokenizableTypes.STRING_LIST;
+  }
+
+  public get isNumberSet(): boolean {
+    return this.isSet && this._type === TokenizableTypes.NUMBER;
+  }
+
+  public get isBooleanSet(): boolean {
+    return this.isSet && this._type === TokenizableTypes.BOOLEAN;
+  }
+
   public get isStringList(): boolean {
-    return this.name === TokenizableTypes.STRING_LIST;
+    return this.isList && this.name === TokenizableTypes.STRING_LIST;
   }
 
   public get isNumberList(): boolean {

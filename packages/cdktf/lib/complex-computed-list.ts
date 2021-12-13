@@ -1,5 +1,6 @@
 import { Token } from "./tokens";
 import { ITerraformResource } from "./terraform-resource";
+import { Fn, propertyAccess } from ".";
 
 abstract class ComplexComputedAttribute {
   constructor(
@@ -75,12 +76,26 @@ export class ComplexComputedList extends ComplexComputedAttribute {
   constructor(
     protected terraformResource: ITerraformResource,
     protected terraformAttribute: string,
-    protected complexComputedListIndex: string
+    protected complexComputedListIndex: string,
+    protected wrapsSet?: boolean
   ) {
     super(terraformResource, terraformAttribute);
   }
 
   protected interpolationForAttribute(property: string) {
+    if (this.wrapsSet) {
+      const x = propertyAccess(
+        Fn.tolist(
+          this.terraformResource.interpolationForAttribute(
+            this.terraformAttribute
+          )
+        ),
+        [this.complexComputedListIndex, property]
+      );
+      console.log(x);
+      return x;
+    }
+
     return this.terraformResource.interpolationForAttribute(
       `${this.terraformAttribute}.${this.complexComputedListIndex}.${property}`
     );

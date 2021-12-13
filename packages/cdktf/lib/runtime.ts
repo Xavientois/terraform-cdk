@@ -11,6 +11,7 @@ import {
   isComplexElement,
 } from "./tokens/private/encoding";
 import { Tokenization } from "./tokens";
+import { Fn } from ".";
 
 // vs. complex types).
 export type Mapper = (x: any) => any;
@@ -23,6 +24,13 @@ export const stringToTerraform: Mapper = identity;
 export const booleanToTerraform: Mapper = identity;
 export const anyToTerraform: Mapper = identity;
 export const numberToTerraform: Mapper = identity;
+
+export function setMapper(elementMapper: Mapper): Mapper {
+  return (x: any) => {
+    if (!canInspect(x)) return x; // do not wrap undefined in toset()
+    return Fn.toset(listMapper(elementMapper)(x));
+  };
+}
 
 export function listMapper(elementMapper: Mapper): Mapper {
   return (x: any) => {
