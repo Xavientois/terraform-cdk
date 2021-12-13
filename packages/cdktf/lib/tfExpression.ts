@@ -1,7 +1,8 @@
 import { IResolvable, IResolveContext } from "./tokens/resolvable";
 import { Intrinsic } from "./tokens/private/intrinsic";
 import { Tokenization } from "./tokens/token";
-import { LazyBase } from ".";
+import { LazyBase } from "./tokens/lazy";
+import { TerraformStack } from "./terraform-stack";
 
 class TFExpression extends Intrinsic implements IResolvable {
   public isInnerTerraformExpression = false;
@@ -114,7 +115,8 @@ export function rawString(str: string): IResolvable {
 }
 
 class Reference extends TFExpression {
-  constructor(private identifier: string) {
+  private crossStackIdentifier: Record<string, string> = {};
+  constructor(private identifier: string, private originStack: TerraformStack) {
     super(identifier);
   }
 
@@ -124,8 +126,9 @@ class Reference extends TFExpression {
       : `\${${this.identifier}}`;
   }
 }
-export function ref(identifier: string): IResolvable {
-  return new Reference(identifier);
+
+export function ref(identifier: string, stack: TerraformStack): IResolvable {
+  return new Reference(identifier, stack);
 }
 
 function markAsInner(arg: any) {
