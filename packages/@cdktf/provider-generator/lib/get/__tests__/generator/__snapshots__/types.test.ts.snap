@@ -1122,7 +1122,7 @@ export class ListOfStringMap extends cdktf.TerraformResource {
 
   // keys - computed: true, optional: false, required: false
   public keys(index: string, key: string): string {
-    return new cdktf.StringMap(this, \`keys.\${index}\`).lookup(key);
+    return new cdktf.StringMap(this, \`keys.\${index}\`, false).lookup(key);
   }
 
   // =========
