@@ -152,7 +152,12 @@ export class AttributesEmitter {
 
     this.code.line(`// Getting the computed value is not yet implemented`);
     if (type.isSet) {
-      return `cdktf.Fn.tolist(this.interpolationForAttribute('${att.terraformName}')) as any`;
+      // Token.asAny is required because tolist returns an Array encoded token which the listMapper
+      // would try to map over when this is passed to another resource. With Token.asAny() it is left
+      // as is by the listMapper and is later properly resolved to a reference
+      // (this only works in TypeScript currently, same as for referencing lists
+      // [see "interpolationForAttribute(...) as any" further below])
+      return `cdktf.Token.asAny(cdktf.Fn.tolist(this.interpolationForAttribute('${att.terraformName}'))) as any`;
     }
     return `this.interpolationForAttribute('${att.terraformName}') as any`;
   }

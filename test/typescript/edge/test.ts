@@ -49,6 +49,14 @@ describe("edge provider test", () => {
       expect(l.singlereq.reqstr).toBe("reqstr");
     });
 
+    it("renders plain values in sets", () => {
+      const s = stack.byId("set_block");
+
+      expect(s.set).toEqual(
+        '${toset([{reqstr = "reqstr", reqnum = 1, reqbool = true}, {reqstr = "reqstr2", reqnum = 0, reqbool = false}])}'
+      );
+    });
+
     it("references plain values", () => {
       expect(stack.byId("plain").str).toEqual(
         "${optional_attribute_resource.test.str}"
@@ -133,6 +141,18 @@ describe("edge provider test", () => {
           "reqstr": "\${list_block_resource.list.singlereq[0].reqstr}",
         }
       `);
+    });
+
+    it("item references set from multi-item list", () => {
+      const item = stack.byId("set_from_list");
+
+      expect(item.set).toEqual("${toset(list_block_resource.list.req)}");
+    });
+
+    it("item references multi-item list from set", () => {
+      const item = stack.byId("list_from_set");
+
+      expect(item.req).toEqual("${tolist(set_block_resource.setblock.set)}");
     });
   });
 });

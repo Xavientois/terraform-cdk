@@ -40,6 +40,13 @@ const list_block_resource = new S()
   })
   .build();
 
+const set_block_resource = new S()
+  .setBlock({
+    name: "set",
+    block: new S().addAllPrimitivePermutations().asBlock(),
+  })
+  .build();
+
 export const edgeSchema: ProviderSchema = schema({
   name: "edge",
   provider: new S().addAllPrimitivePermutations().build(),
@@ -48,6 +55,7 @@ export const edgeSchema: ProviderSchema = schema({
     optional_attribute_resource,
     optional_computed_attribute_resource,
     list_block_resource,
+    set_block_resource,
   },
   dataSources: {},
 });

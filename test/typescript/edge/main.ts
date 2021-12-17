@@ -20,6 +20,12 @@ export class ReferenceStack extends TerraformStack {
       ],
       singlereq: { reqbool: false, reqnum: 1, reqstr: "reqstr" },
     });
+    const set = new edge.SetBlockResource(this, "set_block", {
+      set: [
+        { reqbool: true, reqnum: 1, reqstr: "reqstr" },
+        { reqbool: false, reqnum: 0, reqstr: "reqstr2" },
+      ],
+    });
 
     // plain values
     new edge.RequiredAttributeResource(this, "plain", {
@@ -52,6 +58,17 @@ export class ReferenceStack extends TerraformStack {
     new edge.ListBlockResource(this, "list_literal", {
       req: [list.singlereq],
       singlereq: list.singlereq,
+    });
+
+    // passing a list ref into a set
+    new edge.SetBlockResource(this, "set_from_list", {
+      set: list.req,
+    });
+
+    // passing a set ref into a list
+    new edge.ListBlockResource(this, "list_from_set", {
+      req: set.set,
+      singlereq: { reqbool: true, reqnum: 1, reqstr: "reqstr" },
     });
   }
 }

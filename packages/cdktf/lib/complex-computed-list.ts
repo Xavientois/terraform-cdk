@@ -84,7 +84,7 @@ export class ComplexComputedList extends ComplexComputedAttribute {
 
   protected interpolationForAttribute(property: string) {
     if (this.wrapsSet) {
-      const x = propertyAccess(
+      return propertyAccess(
         Fn.tolist(
           this.terraformResource.interpolationForAttribute(
             this.terraformAttribute
@@ -92,8 +92,6 @@ export class ComplexComputedList extends ComplexComputedAttribute {
         ),
         [this.complexComputedListIndex, property]
       );
-      console.log(x);
-      return x;
     }
 
     return this.terraformResource.interpolationForAttribute(
